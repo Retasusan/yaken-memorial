@@ -19,6 +19,12 @@
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
 	},
+	"r2_buckets": [
+		{
+			"binding": "MEMORIAL_IMAGES",
+			"bucket_name": "memorial-images"
+		}
+	],
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
