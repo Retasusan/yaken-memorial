@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { AppEnv } from "@/types/env";
 import { DeleteButton } from "@/app/components/DeleteButton";
 import { LightboxImage } from "@/app/components/LightboxImage";
+import { MetadataCard } from "@/app/components/MetadataCard";
 
 type RouteParams = {
   params: Promise<{ key: string[] }>;
@@ -84,38 +85,15 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
             {head.uploaded && (
               <p>アップロード: {new Date(head.uploaded).toLocaleString("ja-JP")}</p>
             )}
-            <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4 text-white/80">
-              <p className="mb-2 text-sm font-semibold text-white">メタデータ</p>
-              {meta ? (
-                <div className="space-y-1 text-sm">
-                  {meta.captured_by && <p>撮影: {meta.captured_by}</p>}
-                  {subjects.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      <span className="text-white/70">写っている人:</span>
-                      <div className="flex flex-wrap gap-2">
-                        {subjects.map((name) => (
-                          <span
-                            key={name}
-                            className="rounded-full bg-white/10 px-3 py-1 text-xs text-white shadow"
-                          >
-                            {name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {meta.comment && <p>コメント: {meta.comment}</p>}
-                  {meta.created_at && (
-                    <p className="text-white/60">記録: {new Date(meta.created_at).toLocaleString("ja-JP")}</p>
-                  )}
-                  {!meta.captured_by && !meta.subjects && !meta.comment && (
-                    <p className="text-white/60">メタデータはまだ登録されていません。</p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-white/60">メタデータはまだ登録されていません。</p>
-              )}
-            </div>
+              <MetadataCard
+                imageKey={objectKey}
+                initialMeta={{
+                  capturedBy: meta?.captured_by ?? "",
+                  subjects,
+                  comment: meta?.comment ?? "",
+                  createdAt: meta?.created_at,
+                }}
+              />
 
             <div className="mt-5">
               <DeleteButton imageKey={objectKey} />

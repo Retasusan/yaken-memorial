@@ -1,19 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { PERSON_OPTIONS } from "@/app/constants/personOptions";
 
 type NormalizedImage = { file: File; converted: boolean };
-
-const PERSON_OPTIONS = [
-  "Retasusan",
-  "rokuosan",
-  "nenrin",
-  "ikotome",
-  "taiseiue",
-  "Nikoyaka",
-  "uyuki",
-  "その他",
-];
 
 // ★ ブラウザ限定で HEIC → JPEG
 async function normalizeImage(file: File): Promise<NormalizedImage> {
