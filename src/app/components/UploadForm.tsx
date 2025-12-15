@@ -4,6 +4,17 @@ import { useState } from "react";
 
 type NormalizedImage = { file: File; converted: boolean };
 
+const PERSON_OPTIONS = [
+  "Retasusan",
+  "rokuosan",
+  "nenrin",
+  "ikotome",
+  "taiseiue",
+  "Nikoyaka",
+  "uyuki",
+  "その他",
+];
+
 // ★ ブラウザ限定で HEIC → JPEG
 async function normalizeImage(file: File): Promise<NormalizedImage> {
   const isHeic =
@@ -53,8 +64,12 @@ export default function UploadForm() {
   const [done, setDone] = useState(false);
   const [converted, setConverted] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [capturedBy, setCapturedBy] = useState("");
-  const [subjects, setSubjects] = useState<string[]>([""]);
+  const [capturedBy, setCapturedBy] = useState<{ selected: string; custom: string }>(
+    { selected: "", custom: "" }
+  );
+  const [subjects, setSubjects] = useState<Array<{ selected: string; custom: string }>>([
+    { selected: "", custom: "" },
+  ]);
   const [comment, setComment] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -93,8 +108,17 @@ export default function UploadForm() {
 
       // メタデータ保存（失敗しても致命的ではないので warn に留める）
       if (imageKey) {
+        const capturedByValue =
+          capturedBy.selected === "その他"
+            ? capturedBy.custom.trim()
+            : capturedBy.selected.trim();
+
         const parsedSubjects = Array.from(
-          new Set(subjects.map((s) => s.trim()).filter(Boolean))
+          new Set(
+            subjects
+              .map((s) => (s.selected === "その他" ? s.custom : s.selected).trim())
+              .filter(Boolean)
+          )
         );
 
         const metaRes = await fetch("/api/metadata", {
@@ -104,7 +128,7 @@ export default function UploadForm() {
           },
           body: JSON.stringify({
             key: imageKey,
-            capturedBy: payload.get("capturedBy") || capturedBy,
+            capturedBy: capturedByValue,
             subjects: parsedSubjects,
             comment: payload.get("comment") || comment,
           }),
@@ -159,14 +183,30 @@ export default function UploadForm() {
           <label className="text-sm text-white/80" htmlFor="capturedBy">
             撮影した人（任意）
           </label>
-          <input
-            id="capturedBy"
-            name="capturedBy"
-            value={capturedBy}
-            onChange={(e) => setCapturedBy(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
-            placeholder="例: 山田 太郎"
-          />
+          <div className="space-y-2">
+            <select
+              id="capturedBy"
+              name="capturedBy"
+              value={capturedBy.selected}
+              onChange={(e) => setCapturedBy({ selected: e.target.value, custom: "" })}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+            >
+              <option value="">選択してください</option>
+              {PERSON_OPTIONS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+            {capturedBy.selected === "その他" && (
+              <input
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
+                placeholder="撮影者を入力"
+                value={capturedBy.custom}
+                onChange={(e) => setCapturedBy((prev) => ({ ...prev, custom: e.target.value }))}
+              />
+            )}
+          </div>
         </div>
         <div className="space-y-1">
           <label className="text-sm text-white/80" htmlFor="subjects">
@@ -175,16 +215,34 @@ export default function UploadForm() {
           <div className="space-y-2">
             {subjects.map((value, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <input
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
-                  placeholder="例: 田中さん"
-                  value={value}
+                <select
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+                  value={value.selected}
                   onChange={(e) => {
                     const next = [...subjects];
-                    next[idx] = e.target.value;
+                    next[idx] = { selected: e.target.value, custom: "" };
                     setSubjects(next);
                   }}
-                />
+                >
+                  <option value="">選択してください</option>
+                  {PERSON_OPTIONS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                {value.selected === "その他" && (
+                  <input
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
+                    placeholder="名前を入力"
+                    value={value.custom}
+                    onChange={(e) => {
+                      const next = [...subjects];
+                      next[idx] = { ...next[idx], custom: e.target.value };
+                      setSubjects(next);
+                    }}
+                  />
+                )}
                 {subjects.length > 1 && (
                   <button
                     type="button"
@@ -201,7 +259,7 @@ export default function UploadForm() {
             <button
               type="button"
               className="rounded-lg border border-dashed border-white/25 px-3 py-2 text-xs text-white/80 hover:border-white/50"
-              onClick={() => setSubjects((prev) => [...prev, ""])}
+              onClick={() => setSubjects((prev) => [...prev, { selected: "", custom: "" }])}
             >
               + 追加
             </button>
