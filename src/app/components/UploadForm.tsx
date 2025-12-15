@@ -53,12 +53,16 @@ export default function UploadForm() {
   const [done, setDone] = useState(false);
   const [converted, setConverted] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [capturedBy, setCapturedBy] = useState("");
+  const [subjects, setSubjects] = useState<string[]>([""]);
+  const [comment, setComment] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setDone(false);
     setConverted(false);
+    const payload = new FormData(e.currentTarget);
 
     const input = e.currentTarget.file as HTMLInputElement;
     if (!input.files?.[0]) return;
@@ -79,6 +83,36 @@ export default function UploadForm() {
       if (!res.ok) {
         const msg = await res.text().catch(() => "upload failed");
         throw new Error(msg || "upload failed");
+      }
+
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; key?: string }
+        | null;
+
+      const imageKey = json?.key;
+
+      // メタデータ保存（失敗しても致命的ではないので warn に留める）
+      if (imageKey) {
+        const parsedSubjects = Array.from(
+          new Set(subjects.map((s) => s.trim()).filter(Boolean))
+        );
+
+        const metaRes = await fetch("/api/metadata", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            key: imageKey,
+            capturedBy: payload.get("capturedBy") || capturedBy,
+            subjects: parsedSubjects,
+            comment: payload.get("comment") || comment,
+          }),
+        });
+
+        if (!metaRes.ok) {
+          console.warn("metadata save failed", await metaRes.text().catch(() => ""));
+        }
       }
 
       setDone(true);
@@ -118,6 +152,75 @@ export default function UploadForm() {
         >
           {uploading ? "アップロード中…" : "アップロード"}
         </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-sm text-white/80" htmlFor="capturedBy">
+            撮影した人（任意）
+          </label>
+          <input
+            id="capturedBy"
+            name="capturedBy"
+            value={capturedBy}
+            onChange={(e) => setCapturedBy(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
+            placeholder="例: 山田 太郎"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm text-white/80" htmlFor="subjects">
+            写っている人（任意）
+          </label>
+          <div className="space-y-2">
+            {subjects.map((value, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
+                  placeholder="例: 田中さん"
+                  value={value}
+                  onChange={(e) => {
+                    const next = [...subjects];
+                    next[idx] = e.target.value;
+                    setSubjects(next);
+                  }}
+                />
+                {subjects.length > 1 && (
+                  <button
+                    type="button"
+                    className="rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs text-white hover:border-white/40"
+                    onClick={() => {
+                      setSubjects((prev) => prev.filter((_, i) => i !== idx));
+                    }}
+                  >
+                    削除
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="rounded-lg border border-dashed border-white/25 px-3 py-2 text-xs text-white/80 hover:border-white/50"
+              onClick={() => setSubjects((prev) => [...prev, ""])}
+            >
+              + 追加
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-white/80" htmlFor="comment">
+          コメント（任意）
+        </label>
+        <textarea
+          id="comment"
+          name="comment"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="min-h-[90px] w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40"
+          placeholder="写真の背景や思い出など"
+        />
       </div>
 
       {done && (

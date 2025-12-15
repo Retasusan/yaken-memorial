@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	/* config options here */
+	images: {
+		unoptimized: true, // Cloudflare(OpenNext)での next/image 最適化を無効化し、元画像をそのまま配信
+	},
 };
 
 export default nextConfig;

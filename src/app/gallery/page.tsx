@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Link from "next/link";
 import { AppEnv } from "@/types/env";
+import GalleryList from "./GalleryList";
 
 export default async function GalleryPage() {
   // ★ Cloudflare 環境を直接取得
@@ -46,37 +47,7 @@ export default async function GalleryPage() {
           新しい写真を追加する
         </Link>
       </div>
-
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold text-white">ギャラリー</h2>
-            <p className="text-sm text-white/60">アップロードした写真を静かに並べました。</p>
-          </div>
-          <p className="text-sm text-white/60">{images.length} 枚</p>
-        </div>
-
-        {images.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-white/15 bg-white/5 p-4 text-center text-sm text-white/60">
-            まだ写真はありません。はじめの一枚をどうぞ。
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {images.map((img) => (
-              <Link key={img.key} href={`/gallery/${img.path}`} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-black/30 shadow-xl">
-                  <img
-                    src={img.url}
-                    alt="Uploaded memory"
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03] group-hover:saturate-110"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/35" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+      <GalleryList images={images} />
     </main>
   );
 }

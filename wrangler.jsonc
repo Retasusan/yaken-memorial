@@ -25,6 +25,13 @@
 			"bucket_name": "memorial-images"
 		}
 	],
+	"d1_databases": [
+		{
+			"binding": "MEMORIAL_META",
+			"database_name": "yaken-memorial",
+			"database_id": "6c3c3591-a196-47ae-8baf-e4b804c8b66e"
+		}
+	],
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image

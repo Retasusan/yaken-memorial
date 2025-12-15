@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AppEnv } from "@/types/env";
 
@@ -24,6 +25,32 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
     return notFound();
   }
 
+  const meta = await typedEnv.MEMORIAL_META.prepare(
+    `SELECT image_key, captured_by, subjects, comment, created_at
+     FROM photos WHERE image_key = ?1 LIMIT 1`
+  )
+    .bind(objectKey)
+    .first<{
+      image_key: string;
+      captured_by: string;
+      subjects: string;
+      comment: string;
+      created_at: string;
+    }>();
+
+  const subjects = meta?.subjects
+    ? (() => {
+        try {
+          const arr = JSON.parse(meta.subjects);
+          return Array.isArray(arr)
+            ? arr.map((s) => (typeof s === "string" ? s.trim() : "")).filter(Boolean)
+            : [];
+        } catch {
+          return [];
+        }
+      })()
+    : [];
+
   const imageUrl = `/api/images/${encodeURIComponent(objectKey)}`;
 
   return (
@@ -41,11 +68,14 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
 
       <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur">
         <div className="grid gap-4">
-          <div className="rounded-xl border border-white/10 bg-black/40 p-3">
-            <img
+          <div className="relative min-h-[320px] max-h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-black/40 p-3">
+            <Image
               src={imageUrl}
               alt="Uploaded memory"
-              className="mx-auto w-full max-h-[70vh] object-contain"
+              fill
+              sizes="100vw"
+              className="object-contain"
+              priority
             />
           </div>
           <div className="text-sm text-white/70">
@@ -53,6 +83,38 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
             {head.uploaded && (
               <p>アップロード: {new Date(head.uploaded).toLocaleString("ja-JP")}</p>
             )}
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4 text-white/80">
+              <p className="mb-2 text-sm font-semibold text-white">メタデータ</p>
+              {meta ? (
+                <div className="space-y-1 text-sm">
+                  {meta.captured_by && <p>撮影: {meta.captured_by}</p>}
+                  {subjects.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-white/70">写っている人:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {subjects.map((name) => (
+                          <span
+                            key={name}
+                            className="rounded-full bg-white/10 px-3 py-1 text-xs text-white shadow"
+                          >
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {meta.comment && <p>コメント: {meta.comment}</p>}
+                  {meta.created_at && (
+                    <p className="text-white/60">記録: {new Date(meta.created_at).toLocaleString("ja-JP")}</p>
+                  )}
+                  {!meta.captured_by && !meta.subjects && !meta.comment && (
+                    <p className="text-white/60">メタデータはまだ登録されていません。</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-white/60">メタデータはまだ登録されていません。</p>
+              )}
+            </div>
           </div>
         </div>
       </section>
