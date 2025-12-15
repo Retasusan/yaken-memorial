@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AppEnv } from "@/types/env";
+import { DeleteButton } from "@/app/components/DeleteButton";
 
 type RouteParams = {
   params: Promise<{ key: string[] }>;
@@ -114,6 +115,10 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
               ) : (
                 <p className="text-sm text-white/60">メタデータはまだ登録されていません。</p>
               )}
+            </div>
+
+            <div className="mt-5">
+              <DeleteButton imageKey={objectKey} />
             </div>
           </div>
         </div>
