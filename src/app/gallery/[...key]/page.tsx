@@ -2,10 +2,10 @@ export const dynamic = "force-dynamic";
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AppEnv } from "@/types/env";
 import { DeleteButton } from "@/app/components/DeleteButton";
+import { LightboxImage } from "@/app/components/LightboxImage";
 
 type RouteParams = {
   params: Promise<{ key: string[] }>;
@@ -69,16 +69,7 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
 
       <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur">
         <div className="grid gap-4">
-          <div className="relative min-h-[320px] max-h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-black/40 p-3">
-            <Image
-              src={imageUrl}
-              alt="Uploaded memory"
-              fill
-              sizes="100vw"
-              className="object-contain"
-              priority
-            />
-          </div>
+          <LightboxImage src={imageUrl} alt="Uploaded memory" />
           <div className="text-sm text-white/70">
             <p>保存キー: {objectKey}</p>
             {head.uploaded && (
