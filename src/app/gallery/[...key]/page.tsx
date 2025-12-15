@@ -68,6 +68,15 @@ export default async function GalleryDetailPage({ params }: RouteParams) {
       </div>
 
       <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/gallery"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25 hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <span aria-hidden>←</span>
+            ギャラリーに戻る
+          </Link>
+        </div>
         <div className="grid gap-4">
           <LightboxImage src={imageUrl} alt="Uploaded memory" />
           <div className="text-sm text-white/70">
