@@ -56,35 +56,44 @@ export default function UploadForm() {
   }
 
   return (
-    <div style={{ maxWidth: 480 }}>
-      <h2>画像アップロード</h2>
-
-      <form onSubmit={handleSubmit}>
-        <input type="file" name="file" accept="image/*" />
-        <button type="submit" disabled={state.status === "uploading"}>
-          アップロード
-        </button>
+    <div className="space-y-3">
+      <form className="space-y-3" onSubmit={handleSubmit}>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            className="w-full max-w-xs cursor-pointer rounded-xl border border-dashed border-white/20 bg-white/5 px-3 py-2 text-sm text-white file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white transition hover:file:bg-white/15"
+            type="file"
+            name="file"
+            accept="image/*"
+          />
+          <button
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-300 to-teal-200 px-4 py-2 text-sm font-bold text-slate-950 shadow-lg shadow-teal-300/30 transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
+            type="submit"
+            disabled={state.status === "uploading"}
+          >
+            {state.status === "uploading" ? "アップロード中…" : "アップロード"}
+          </button>
+        </div>
       </form>
 
       {/* ---- フィードバック ---- */}
-      <div style={{ marginTop: 12 }}>
-        {state.status === "idle" && <p>画像を選択してください</p>}
+      <div className="text-sm text-white/70">
+        {state.status === "idle" && <p>画像を選択して送信してください。</p>}
 
         {state.status === "uploading" && (
-          <p>⏳ アップロード中...</p>
+          <p>⏳ アップロード中です。少しお待ちください。</p>
         )}
 
         {state.status === "success" && (
-          <>
-            <p>✅ アップロード成功</p>
-            <code>{state.key}</code>
-          </>
+          <div className="space-y-1 text-emerald-300">
+            <span className="block">✅ アップロードが完了しました。</span>
+            <code className="block overflow-hidden text-ellipsis whitespace-pre rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80">
+              {state.key}
+            </code>
+          </div>
         )}
 
         {state.status === "error" && (
-          <p style={{ color: "red" }}>
-            ❌ エラー: {state.message}
-          </p>
+          <p className="text-rose-300">❌ エラー: {state.message}</p>
         )}
       </div>
     </div>

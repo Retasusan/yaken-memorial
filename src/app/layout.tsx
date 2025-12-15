@@ -16,7 +16,7 @@ export default function RootLayout({
 			<head>
 				<link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
 			</head>
-			<body>{children}</body>
+			<body className="min-h-screen">{children}</body>
 		</html>
 	);
 }
