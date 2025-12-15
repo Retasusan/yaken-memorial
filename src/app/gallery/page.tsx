@@ -26,6 +26,7 @@ export default async function GalleryPage() {
     .map((obj) => ({
       key: obj.key,
       url: `/api/images/${encodeURIComponent(obj.key)}`,
+      path: obj.key.split("/").map(encodeURIComponent).join("/"),
     }));
 
   return (
@@ -62,17 +63,16 @@ export default async function GalleryPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {images.map((img) => (
-              <div
-                key={img.key}
-                className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-black/30 shadow-xl"
-              >
-                <img
-                  src={img.url}
-                  alt="Uploaded memory"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03] group-hover:saturate-110"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/35" />
-              </div>
+              <Link key={img.key} href={`/gallery/${img.path}`} className="group block">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-black/30 shadow-xl">
+                  <img
+                    src={img.url}
+                    alt="Uploaded memory"
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03] group-hover:saturate-110"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/35" />
+                </div>
+              </Link>
             ))}
           </div>
         )}
